@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "raccoon-websocket-service"
+version = "0.1.0"
+description = ""
+authors = ["Zsolt Mester <22896196+meister245@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "raccoon_websocket_service"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ccxt = "^2.2.25"
+redis = "^4.3.5"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+flake8 = "^5.0.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

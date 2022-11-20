@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+
+  raccoon-websocket:
+    container_name: masked-trader-websocket-service-dev
+    image: masked-trader/websocket-service:dev
+    build:
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./.env.development
+    volumes:
+      - ./src/:/workspace/app/
+    depends_on:
+      - redis
+    networks:
+      - redis-network
+    restart: unless-stopped
+
+  redis:
+    container_name: redis-dev
+    image: redislabs/redistimeseries
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no --loadmodule /usr/lib/redis/modules/redistimeseries.so
+    ports:
+      - 6379:6379
+    networks:
+      - redis-network
+    volumes:
+      - redis-dev-data:/data/
+
+volumes:
+  redis-dev-data: null
+
+networks:
+  redis-network:
+    driver: bridge
