@@ -16,7 +16,7 @@ services:
     depends_on:
       - redis
     networks:
-      - redis-network
+      - raccoon-websocket-network-dev
     restart: unless-stopped
 
   redis:
@@ -27,13 +27,13 @@ services:
     ports:
       - 6379:6379
     networks:
-      - redis-network
+      - raccoon-websocket-network-dev
     volumes:
-      - redis-dev-data:/data/
+      - raccoon-websocket-redis-data-dev:/data/
 
 volumes:
-  redis-dev-data: null
+  raccoon-websocket-redis-data-dev: null
 
 networks:
-  redis-network:
+  raccoon-websocket-network-dev:
     driver: bridge
