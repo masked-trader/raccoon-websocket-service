@@ -1,11 +1,9 @@
-import functools
-import hashlib
 import os
 
 EXCHANGE_NAME = os.getenv("RACCOON_EXCHANGE_NAME", "binance")
 EXCHANGE_API_KEY = os.getenv("RACCOON_EXCHANGE_API_KEY", "placeholder")
 EXCHANGE_API_SECRET = os.getenv("RACCOON_EXCHANGE_API_SECRET", "placeholder")
-EXCHANGE_TESTNET = bool(os.getenv("RACCOON_EXCHANGE_TESTNET", False))
+EXCHANGE_SANDBOX = bool(os.getenv("RACCOON_EXCHANGE_SANDBOX", False))
 
 REDIS_HOST = os.getenv("RACCOON_REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("RACCOON_REDIS_PORT", 6379))
@@ -17,19 +15,13 @@ WEBSOCKET_STREAM_LIFETIME_SECONDS = int(
 )
 
 
-@functools.cache
-def get_redis_key_prefix():
-    if EXCHANGE_TESTNET:
-        return "-".join([EXCHANGE_NAME, "sandbox"])
-
-    return EXCHANGE_NAME
+def get_connection_name():
+    return "-".join([EXCHANGE_NAME, "sandbox"]) if EXCHANGE_SANDBOX else EXCHANGE_NAME
 
 
-@functools.cache
-def get_redis_private_key_prefix():
-    hashed_key = hashlib.md5(EXCHANGE_API_KEY.encode()).hexdigest()
+def get_connection_unique_name():
+    connection_name = (
+        "-".join([EXCHANGE_NAME, "sandbox"]) if EXCHANGE_SANDBOX else EXCHANGE_NAME
+    )
 
-    if EXCHANGE_TESTNET:
-        return "-".join([EXCHANGE_NAME, "sandbox", hashed_key[:6]])
-
-    return "-".join([EXCHANGE_NAME, hashed_key[:6]])
+    return "-".join([connection_name, EXCHANGE_API_KEY[:6]])

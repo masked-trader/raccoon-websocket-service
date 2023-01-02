@@ -10,6 +10,7 @@ build:
 clean:
 	docker system prune --force
 	docker volume prune --force
+	docker network prune --force
 
 debug_service:
 	docker compose exec raccoon-websocket bash

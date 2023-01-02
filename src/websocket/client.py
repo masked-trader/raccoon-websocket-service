@@ -7,7 +7,7 @@ from constants import (
     EXCHANGE_API_KEY,
     EXCHANGE_API_SECRET,
     EXCHANGE_NAME,
-    EXCHANGE_TESTNET,
+    EXCHANGE_SANDBOX,
     REDIS_DB,
     REDIS_HOST,
     REDIS_PORT,
@@ -30,7 +30,7 @@ def get_websocket_client() -> ccxt.pro.Exchange:
         config.update({"secret": EXCHANGE_API_SECRET})
 
     client: ccxt.pro.Exchange = websocket_cls(config)
-    client.set_sandbox_mode(EXCHANGE_TESTNET)
+    client.set_sandbox_mode(EXCHANGE_SANDBOX)
 
     return client
 

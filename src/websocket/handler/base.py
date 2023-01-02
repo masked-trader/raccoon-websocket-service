@@ -1,7 +1,7 @@
 import json
 import logging
 
-from constants import get_redis_key_prefix, get_redis_private_key_prefix
+from constants import get_connection_name, get_connection_unique_name
 from websocket.client import get_redis_client
 
 STATUS_ACTIVE = "active"
@@ -18,8 +18,8 @@ class WebsocketHandler:
 
         self.redis = get_redis_client()
 
-        self.db_prefix = get_redis_key_prefix()
-        self.db_prefix_private = get_redis_private_key_prefix()
+        self.db_prefix = get_connection_name()
+        self.db_prefix_private = get_connection_unique_name()
 
         self.subscriptions = {}
 
