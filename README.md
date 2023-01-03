@@ -3,33 +3,31 @@
 Async websocket service with Redis storage integration
 and on-demand stream subscription, using `ccxt.pro` websocket methods.
 
-## requirements
+## Setup
 
-- Docker Compose
-- Python 3.11+ (local development)
+Install Docker and Docker Compose
 
-## setup
+[https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
 
-Local development requires a `.env.development` env file.
-See the included `.env.sample` for reference.
+Local development requires a `.env.development` env file. See the included `.env.development.sample` for reference.
 
-## local usage
-
-The following examples were made with the `.env.sample` configuration, using the Binance testnet.
-
-**Start service and access Redis CLI**
+**Start websocket service**
 
 ```
 docker compose up
+```
+
+**Access Redis CLI in container**
+
+```
 docker compose exec redis redis-cli
 ```
 
-**Data handling**
+The following examples were based on the `.env.development.sample` configuration and using development API key for Binance testnet.
 
-Private API data is stored with keys that include a unique identifier, which is derived from the API key.
-Making data collected to be unique for the API key, while public API data is not specific for the API key.
+## Public Stream Subscriptions
 
-**Subscribe to ticker stream and view data**
+### Ticker Stream
 
 ```
 127.0.0.1:6379> set binance-sandbox-ticker-subs '["BTCUSDT"]'
@@ -39,7 +37,7 @@ OK
 "{\"symbol\": \"BTC/USDT\", \"timestamp\": 1670029046526, \"datetime\": \"2022-12-03T00:57:26.526Z\", \"high\": 17573.86, \"low\": 16426.15, \"bid\": 17044.46, \"bidVolume\": 0.114581, \"ask\": 17044.63, \"askVolume\": 0.171315, \"vwap\": 16966.21250138, \"open\": 17006.16, \"close\": 17044.46, \"last\": 17044.46, \"previousClose\": 17006.16, \"change\": 38.3, \"percentage\": 0.225, \"average\": null, \"baseVolume\": 7550.114946, \"quoteVolume\": 128096854.58368158, \"info\": {\"e\": \"24hrTicker\", \"E\": 1670029046526, \"s\": \"BTCUSDT\", \"p\": \"38.30000000\", \"P\": \"0.225\", \"w\": \"16966.21250138\", \"x\": \"17006.16000000\", \"c\": \"17044.46000000\", \"Q\": \"0.00100000\", \"b\": \"17044.46000000\", \"B\": \"0.11458100\", \"a\": \"17044.63000000\", \"A\": \"0.17131500\", \"o\": \"17006.16000000\", \"h\": \"17573.86000000\", \"l\": \"16426.15000000\", \"v\": \"7550.11494600\", \"q\": \"128096854.58368158\", \"O\": 1669942646526, \"C\": 1670029046526, \"F\": 4829287, \"L\": 5006014, \"n\": 176728}}"
 ```
 
-**Subscribe to kline stream and view time series data**
+### Kline Stream
 
 ```
 127.0.0.1:6379> set binance-sandbox-kline-subs '["BTCUSDT-5m"]'
@@ -66,9 +64,18 @@ OK
 2) 22.270596
 ```
 
-**Generate data for balance and order streams**
+## Private Stream Subscriptions
+
+Private API data is stored with keys that include a unique identifier, which is derived from the API key.
+Making data collected to be unique for the API key, while public API data is not specific for the API key.
+
+### Generate Data
 
 Example script for generating order data on Binance testnet
+
+Get a development API key for testing:
+
+[https://testnet.binance.vision/](https://testnet.binance.vision/)
 
 ```
 #!/usr/bin/python3
@@ -82,13 +89,11 @@ binance.create_order("BTCUSDT", "limit", "buy", 0.1, 17000)
 binance.create_order("ETHUSDT", "limit", "buy", 0.1, 1300)
 ```
 
-**View user balance private data**
+### Balance Stream
 
 ```
 127.0.0.1:6379> keys *
-1) "binance-sandbox-4db7ef-order-BTCUSDT"
-2) "binance-sandbox-4db7ef-order-ETHUSDT"
-3) "binance-sandbox-4db7ef-balance"
+1) "binance-sandbox-4db7ef-balance"
 
 127.0.0.1:6379> hkeys binance-sandbox-4db7ef-balance
 1) "total"
@@ -117,13 +122,12 @@ binance.create_order("ETHUSDT", "limit", "buy", 0.1, 1300)
 "{\"free\": 100.1, \"used\": 0.0, \"total\": 100.1}"
 ```
 
-**View user order private data**
+### Order Stream
 
 ```
 127.0.0.1:6379> keys *
 1) "binance-sandbox-4db7ef-order-BTCUSDT"
 2) "binance-sandbox-4db7ef-order-ETHUSDT"
-3) "binance-sandbox-4db7ef-balance"
 
 127.0.0.1:6379> hkeys binance-sandbox-4db7ef-order-BTCUSDT
 1) "5699638"

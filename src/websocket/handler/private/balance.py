@@ -4,7 +4,7 @@ import time
 import typing
 
 from constants import WEBSOCKET_STREAM_LIFETIME_SECONDS
-from websocket.client import get_websocket_client
+from websocket.client import get_websocket_client, is_auth_missing
 from websocket.handler.base import WebsocketHandler
 
 
@@ -19,6 +19,9 @@ class WebsocketBalanceHandler(WebsocketHandler):
             self.redis.hset(db_key, key, json.dumps(value))
 
     async def manage_streams(self):
+        if is_auth_missing():
+            return
+
         self.add_subscription(self.handler_type)
 
         while True:

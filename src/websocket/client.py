@@ -14,6 +14,11 @@ from constants import (
 )
 
 
+def is_auth_missing() -> bool:
+    invalid_values = [None, "", "placeholder"]
+    return EXCHANGE_API_KEY in invalid_values or EXCHANGE_API_SECRET in invalid_values
+
+
 @functools.cache
 def get_websocket_client() -> ccxt.pro.Exchange:
     if EXCHANGE_NAME not in ccxt.pro.exchanges:
@@ -23,10 +28,10 @@ def get_websocket_client() -> ccxt.pro.Exchange:
 
     config = {}
 
-    if EXCHANGE_API_KEY is not None:
+    if EXCHANGE_API_KEY is not None and EXCHANGE_API_KEY != "placeholder":
         config.update({"apiKey": EXCHANGE_API_KEY})
 
-    if EXCHANGE_API_SECRET is not None:
+    if EXCHANGE_API_SECRET is not None and EXCHANGE_API_SECRET != "placeholder":
         config.update({"secret": EXCHANGE_API_SECRET})
 
     client: ccxt.pro.Exchange = websocket_cls(config)

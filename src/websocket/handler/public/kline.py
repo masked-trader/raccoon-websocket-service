@@ -2,7 +2,12 @@ import asyncio
 import time
 import typing
 
-from constants import EXCHANGE_NAME, WEBSOCKET_STREAM_LIFETIME_SECONDS
+from constants import (
+    EXCHANGE_NAME,
+    WEBSOCKET_KLINE_DUPLICATE_POLICY,
+    WEBSOCKET_KLINE_RETENTION_SECONDS,
+    WEBSOCKET_STREAM_LIFETIME_SECONDS,
+)
 from websocket.client import get_websocket_client
 from websocket.handler.base import WebsocketHandler
 
@@ -85,9 +90,7 @@ class WebsocketKlineHandler(WebsocketHandler):
         for ts_key in self.redis.scan_iter(scan_query):
             self.redis.delete(ts_key)
 
-    def setup_kline_time_series(
-        self, market, interval, duplicate_policy="last", retention=14400000
-    ):
+    def setup_kline_time_series(self, market, interval):
         self.logger.debug(
             "setup %s time series keys - %s %s", self.handler_type, market, interval
         )
@@ -102,32 +105,32 @@ class WebsocketKlineHandler(WebsocketHandler):
 
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_OPEN),
-            duplicate_policy=duplicate_policy,
-            retention_msecs=retention,
+            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
+            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_HIGH),
-            duplicate_policy=duplicate_policy,
-            retention_msecs=retention,
+            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
+            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_LOW),
-            duplicate_policy=duplicate_policy,
-            retention_msecs=retention,
+            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
+            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_CLOSE),
-            duplicate_policy=duplicate_policy,
-            retention_msecs=retention,
+            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
+            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_VOLUME),
-            duplicate_policy=duplicate_policy,
-            retention_msecs=retention,
+            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
+            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
             labels=labels,
         )
 
