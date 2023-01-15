@@ -4,7 +4,7 @@
         "source.organizeImports": true,
     },
     "files.associations": {
-        ".env.*": "env",
+        ".env.*": "properties",
     },
     "python.analysis.typeCheckingMode": "basic",
     "python.formatting.provider": "black",
