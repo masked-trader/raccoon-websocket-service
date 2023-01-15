@@ -3,8 +3,8 @@ import json
 import time
 import typing
 
-from constants import WEBSOCKET_STREAM_LIFETIME_SECONDS
-from websocket.client import get_websocket_client, is_auth_missing
+from constants import SERVICE_STREAM_LIFETIME_SECONDS
+from util import get_exchange_websocket_client
 from websocket.handler.base import WebsocketHandler
 
 
@@ -19,9 +19,6 @@ class WebsocketBalanceHandler(WebsocketHandler):
             self.redis.hset(db_key, key, json.dumps(value))
 
     async def manage_streams(self):
-        if is_auth_missing():
-            return
-
         self.add_subscription(self.handler_type)
 
         while True:
@@ -34,9 +31,9 @@ class WebsocketBalanceHandler(WebsocketHandler):
             await asyncio.sleep(3)
 
     async def handle_balance_stream(self, params: typing.Optional[dict] = None):
-        reset_timestamp = time.time() + WEBSOCKET_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_websocket_client()
+        client = get_exchange_websocket_client(self.connection_id)
 
         if params is None:
             params = {}

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from websocket.client import get_websocket_client
+from util import get_exchange_websocket_client
 from websocket.handler.private.balance import WebsocketBalanceHandler
 from websocket.handler.private.order import WebsocketOrderHandler
 from websocket.handler.public.kline import WebsocketKlineHandler
@@ -9,18 +9,20 @@ from websocket.handler.public.ticker import WebsocketTickerHandler
 
 
 class WebsocketService:
-    def __init__(self, logger=None):
-        self.logger = logging.getLogger(__name__) if logger is None else logger
+    def __init__(self, connection_id: str):
+        self.logger = logging.getLogger(f"websocket.service {connection_id}")
 
-        self.balance_handler = WebsocketBalanceHandler(logger=logger)
-        self.order_handler = WebsocketOrderHandler(logger=logger)
-        self.kline_handler = WebsocketKlineHandler(logger=logger)
-        self.ticker_handler = WebsocketTickerHandler(logger=logger)
+        self.connection_id = connection_id
+
+        self.kline_handler = WebsocketKlineHandler(connection_id)
+        self.order_handler = WebsocketOrderHandler(connection_id)
+        self.ticker_handler = WebsocketTickerHandler(connection_id)
+        self.balance_handler = WebsocketBalanceHandler(connection_id)
 
     async def start(self):
-        client = get_websocket_client()
+        client = get_exchange_websocket_client(self.connection_id)
 
-        self.logger.info("starting websocket service")
+        self.logger.info("starting websocket service %s", self.connection_id)
 
         try:
             await asyncio.gather(
@@ -39,3 +41,9 @@ class WebsocketService:
         finally:
             await client.close()
             self.logger.info("connection closed")
+
+    async def stop(self):
+        self.logger.info("websocket service stopping %s", self.connection_id)
+
+        client = get_exchange_websocket_client(self.connection_id)
+        await client.close()

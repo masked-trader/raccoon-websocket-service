@@ -3,8 +3,8 @@ import json
 import time
 import typing
 
-from constants import WEBSOCKET_STREAM_LIFETIME_SECONDS
-from websocket.client import get_websocket_client
+from constants import SERVICE_STREAM_LIFETIME_SECONDS
+from util import get_exchange_websocket_client
 from websocket.handler.base import WebsocketHandler
 
 
@@ -36,9 +36,9 @@ class WebsocketTickerHandler(WebsocketHandler):
     async def handle_ticker_stream(
         self, sub_key: str, params: typing.Optional[dict] = None
     ):
-        reset_timestamp = time.time() + WEBSOCKET_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_websocket_client()
+        client = get_exchange_websocket_client(self.connection_id)
 
         if params is None:
             params = {}

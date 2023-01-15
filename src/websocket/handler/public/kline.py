@@ -3,12 +3,11 @@ import time
 import typing
 
 from constants import (
-    EXCHANGE_NAME,
-    WEBSOCKET_KLINE_DUPLICATE_POLICY,
-    WEBSOCKET_KLINE_RETENTION_SECONDS,
-    WEBSOCKET_STREAM_LIFETIME_SECONDS,
+    REDIS_TIME_SERIES_DUPLICATE_POLICY,
+    REDIS_TIME_SERIES_RETENTION_SECONDS,
+    SERVICE_STREAM_LIFETIME_SECONDS,
 )
-from websocket.client import get_websocket_client
+from util import get_exchange_websocket_client
 from websocket.handler.base import WebsocketHandler
 
 TIME_SERIES_OPEN = "open"
@@ -54,9 +53,9 @@ class WebsocketKlineHandler(WebsocketHandler):
         params: typing.Optional[dict] = None,
     ):
         symbol, interval = sub_key.split("-")
-        reset_timestamp = time.time() + WEBSOCKET_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_websocket_client()
+        client = get_exchange_websocket_client(self.connection_id)
 
         if params is None:
             params = {}
@@ -97,7 +96,6 @@ class WebsocketKlineHandler(WebsocketHandler):
 
         labels = {
             "market": market,
-            "exchange": EXCHANGE_NAME,
             "interval": interval,
         }
 
@@ -105,32 +103,32 @@ class WebsocketKlineHandler(WebsocketHandler):
 
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_OPEN),
-            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
-            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
+            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
+            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_HIGH),
-            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
-            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
+            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
+            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_LOW),
-            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
-            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
+            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
+            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_CLOSE),
-            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
-            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
+            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
+            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_VOLUME),
-            duplicate_policy=WEBSOCKET_KLINE_DUPLICATE_POLICY,
-            retention_msecs=WEBSOCKET_KLINE_RETENTION_SECONDS,
+            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
+            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
             labels=labels,
         )
 

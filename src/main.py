@@ -3,19 +3,17 @@
 import asyncio
 import logging
 
-from constants import WEBSOCKET_LOG_LEVEL
-from websocket.service import WebsocketService
+from constants import SERVICE_LOG_LEVEL
+from websocket.manager import WebsocketServiceManager
 
 logging.basicConfig(
-    level=getattr(logging, WEBSOCKET_LOG_LEVEL),
+    level=getattr(logging, SERVICE_LOG_LEVEL),
     format="%(asctime)s %(name)s %(levelname)s %(message)s",
 )
 
-logger = logging.getLogger("websocket")
-
 
 def main():
-    manager = WebsocketService(logger=logger)
+    manager = WebsocketServiceManager()
 
     asyncio.run(manager.start())
 

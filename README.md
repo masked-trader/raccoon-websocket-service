@@ -3,36 +3,56 @@
 Async websocket service with Redis storage integration
 and on-demand stream subscription, using `ccxt.pro` websocket methods.
 
-## Setup
+## Usage
 
 Install Docker and Docker Compose
 
 [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
 
-Local development requires a `.env.development` env file. See the included `.env.development.sample` for reference.
-
-**Start websocket service**
+**Start service**
 
 ```
 docker compose up
 ```
 
-**Access Redis CLI in container**
+**Configure exchange connection**
+
+Generate API keys for testing
+
+[https://testnet.binance.vision/](https://testnet.binance.vision/)
 
 ```
-docker compose exec redis redis-cli
-```
+curl --location --request POST 'http://localhost:8000/api/v1/config/connection/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "id": "test-connection-id",
+    "exchange": "binance",
+    "apiKey": "YOUR_API_KEY",
+    "secret": "YOUR_API_SECRET",
+    "sandbox": true,
+    "options": {}
+}'
 
-The following examples were based on the `.env.development.sample` configuration and using development API key for Binance testnet.
+```
 
 ## Public Stream Subscriptions
 
 ### Ticker Stream
 
 ```
-127.0.0.1:6379> set binance-sandbox-ticker-subs '["BTCUSDT"]'
-OK
+curl --location --request POST 'http://localhost:8000/api/v1/config/subscription/ticker/' \
+--header 'X-Connection-Id: test-connection-id' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "symbol": "BTCUSDT"
+}'
+```
 
+```
+docker compose exec redis redis-cli
+```
+
+```
 127.0.0.1:6379> hget binance-sandbox-ticker BTCUSDT
 "{\"symbol\": \"BTC/USDT\", \"timestamp\": 1670029046526, \"datetime\": \"2022-12-03T00:57:26.526Z\", \"high\": 17573.86, \"low\": 16426.15, \"bid\": 17044.46, \"bidVolume\": 0.114581, \"ask\": 17044.63, \"askVolume\": 0.171315, \"vwap\": 16966.21250138, \"open\": 17006.16, \"close\": 17044.46, \"last\": 17044.46, \"previousClose\": 17006.16, \"change\": 38.3, \"percentage\": 0.225, \"average\": null, \"baseVolume\": 7550.114946, \"quoteVolume\": 128096854.58368158, \"info\": {\"e\": \"24hrTicker\", \"E\": 1670029046526, \"s\": \"BTCUSDT\", \"p\": \"38.30000000\", \"P\": \"0.225\", \"w\": \"16966.21250138\", \"x\": \"17006.16000000\", \"c\": \"17044.46000000\", \"Q\": \"0.00100000\", \"b\": \"17044.46000000\", \"B\": \"0.11458100\", \"a\": \"17044.63000000\", \"A\": \"0.17131500\", \"o\": \"17006.16000000\", \"h\": \"17573.86000000\", \"l\": \"16426.15000000\", \"v\": \"7550.11494600\", \"q\": \"128096854.58368158\", \"O\": 1669942646526, \"C\": 1670029046526, \"F\": 4829287, \"L\": 5006014, \"n\": 176728}}"
 ```
@@ -40,9 +60,20 @@ OK
 ### Kline Stream
 
 ```
-127.0.0.1:6379> set binance-sandbox-kline-subs '["BTCUSDT-5m"]'
-OK
+curl --location --request POST 'http://localhost:8000/api/v1/config/subscription/kline/' \
+--header 'X-Connection-Id: test-connection-id' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "symbol": "BTCUSDT",
+    "interval": "5m"
+}'
+```
 
+```
+docker compose exec redis redis-cli
+```
+
+```
 127.0.0.1:6379> ts.get binance-sandbox-kline-BTCUSDT-5m-open
 1) (integer) 1671844500000
 2) 16805.68

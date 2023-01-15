@@ -3,37 +3,78 @@ version: '3.8'
 services:
 
   raccoon-websocket:
-    container_name: masked-trader-websocket-service-dev
+    container_name: raccoon-websocket-service-dev
     image: masked-trader/websocket-service:dev
     build:
       context: .
-      target: development
       dockerfile: ./Dockerfile
+      target: development
     env_file:
       - ./.env.development
+    environment:
+      RACCOON_INTERNAL_CONFIG_API: http://raccoon-configuration:8000/internal/config
     volumes:
       - ./src/:/workspace/app/
     depends_on:
       - redis
-    networks:
-      - raccoon-websocket-network-dev
+      - raccoon-configuration
+    restart: unless-stopped
+
+  raccoon-configuration:
+    container_name: raccoon-configuration-service-dev
+    image: masked-trader/configuration-service:dev
+    build:
+      context: github.com/masked-trader/raccoon-configuration-service.git
+      dockerfile: ./Dockerfile
+      target: development
+    environment:
+      RACCOON_REDIS_HOST: redis
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+      - mongodb
+    restart: unless-stopped
+
+  mongodb:
+    container_name: raccoon-mongodb-dev
+    image: mongo:5
+    environment:
+      MONGO_INITDB_DATABASE: raccoon
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-data-dev:/data/db
+      - mongodb-data-dev:/data/configdb
+    restart: unless-stopped
+
+  mongo-express:
+    container_name: raccoon-mongo-express-dev
+    image: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: rootpassword
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
     restart: unless-stopped
 
   redis:
-    container_name: redis-dev
+    container_name: raccoon-redis-dev
     image: redislabs/redistimeseries
     restart: unless-stopped
     command: redis-server --save "" --appendonly no --loadmodule /usr/lib/redis/modules/redistimeseries.so
     ports:
       - 6379:6379
-    networks:
-      - raccoon-websocket-network-dev
     volumes:
-      - raccoon-websocket-redis-data-dev:/data/
+      - redis-data-dev:/data/
 
 volumes:
-  raccoon-websocket-redis-data-dev: null
-
-networks:
-  raccoon-websocket-network-dev:
-    driver: bridge
+  mongodb-data-dev: null
+  redis-data-dev: null

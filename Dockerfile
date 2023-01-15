@@ -9,13 +9,12 @@ ENV PYTHONFAULTHANDLER=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
     # poetry:
-    POETRY_VERSION=1.2.2 \
     POETRY_NO_INTERACTION=1 \
     POETRY_CACHE_DIR='/var/cache/pypoetry' \
     PATH="$PATH:/root/.local/bin"
 
 RUN pip install pipx
-RUN pipx install "poetry==$POETRY_VERSION"
+RUN pipx install poetry
 
 FROM python-base as builder-base
 

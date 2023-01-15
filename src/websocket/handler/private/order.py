@@ -3,8 +3,8 @@ import json
 import time
 import typing
 
-from constants import WEBSOCKET_STREAM_LIFETIME_SECONDS
-from websocket.client import get_websocket_client, is_auth_missing
+from constants import SERVICE_STREAM_LIFETIME_SECONDS
+from util import get_exchange_websocket_client
 from websocket.handler.base import WebsocketHandler
 
 
@@ -19,9 +19,6 @@ class WebsocketOrderHandler(WebsocketHandler):
             self.redis.hset(db_key, data["id"], json.dumps(data))
 
     async def manage_streams(self):
-        if is_auth_missing():
-            return
-
         self.add_subscription(self.handler_type)
 
         while True:
@@ -40,9 +37,9 @@ class WebsocketOrderHandler(WebsocketHandler):
         limit: typing.Optional[int] = None,
         params: typing.Optional[dict] = None,
     ):
-        reset_timestamp = time.time() + WEBSOCKET_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_websocket_client()
+        client = get_exchange_websocket_client(self.connection_id)
 
         if since is not None:
             since = client.iso8601(since)

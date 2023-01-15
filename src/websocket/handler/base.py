@@ -1,11 +1,25 @@
-import json
 import logging
 
-from constants import get_connection_name, get_connection_unique_name
-from websocket.client import get_redis_client
+from client import get_redis_client
+from util import get_exchange_connection_config
 
 STATUS_ACTIVE = "active"
 STATUS_INACTIVE = "inactive"
+
+
+def get_connection_name(connection_id: str):
+    config = get_exchange_connection_config(connection_id)
+
+    return (
+        "-".join([config["exchange"], "sandbox"])
+        if config["sandbox"]
+        else config["exchange"]
+    )
+
+
+def get_connection_unique_name(connection_id: str):
+    connection_name = get_connection_name(connection_id)
+    return "-".join([connection_name, connection_id])
 
 
 class WebsocketHandler:
@@ -13,13 +27,14 @@ class WebsocketHandler:
     handler_type = "base"
     subscription_key = "base-subs"
 
-    def __init__(self, logger=None) -> None:
-        self.logger = logging.getLogger(__name__) if logger is None else logger
+    def __init__(self, connection_id: str) -> None:
+        self.logger = logging.getLogger(f"websocket.handler {connection_id}")
 
         self.redis = get_redis_client()
+        self.connection_id = connection_id
 
-        self.db_prefix = get_connection_name()
-        self.db_prefix_private = get_connection_unique_name()
+        self.db_prefix = get_connection_name(connection_id)
+        self.db_prefix_private = get_connection_unique_name(connection_id)
 
         self.subscriptions = {}
 
@@ -36,8 +51,7 @@ class WebsocketHandler:
         return dict(self.subscriptions)
 
     def manage_subscriptions(self, db_key: str):
-        raw_data = self.redis.get(db_key)
-        db_subs = json.loads(raw_data) if raw_data else []
+        db_subs = {sub.decode() for sub in self.redis.smembers(db_key)}
 
         for db_sub in db_subs:
             if db_sub not in self.subscriptions:
