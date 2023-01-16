@@ -97,72 +97,50 @@ docker compose exec redis redis-cli
 
 ## Private Stream Subscriptions
 
-Private API data is stored with keys that include a unique identifier, which is derived from the API key.
-Making data collected to be unique for the API key, while public API data is not specific for the API key.
+Private API data is stored with keys that include the connection ID, making the keys unique for each connection.
 
 ### Generate Data
 
-Example script for generating order data on Binance testnet
-
-Get a development API key for testing:
-
-[https://testnet.binance.vision/](https://testnet.binance.vision/)
-
 ```
-#!/usr/bin/python3
-
-import ccxt
-
-binance = ccxt.binance({ "apiKey": "<api_key>", "secret": "<secret>" })
-binance.set_sandbox_mode(True)
-
-binance.create_order("BTCUSDT", "limit", "buy", 0.1, 17000)
-binance.create_order("ETHUSDT", "limit", "buy", 0.1, 1300)
-```
-
-### Balance Stream
-
-```
-127.0.0.1:6379> keys *
-1) "binance-sandbox-4db7ef-balance"
-
-127.0.0.1:6379> hkeys binance-sandbox-4db7ef-balance
-1) "total"
-2) "datetime"
-3) "free"
-4) "used"
-5) "info"
-6) "BTC"
-7) "timestamp"
-8) "USDT"
-9) "ETH"
-
-127.0.0.1:6379> hget binance-sandbox-4db7ef-balance free
-"{\"BTC\": 1.2, \"USDT\": 6515.87905232, \"ETH\": 100.1}"
-
-127.0.0.1:6379> hget binance-sandbox-4db7ef-balance total
-"{\"BTC\": 1.2, \"USDT\": 6515.87905232, \"ETH\": 100.1}"
-
-127.0.0.1:6379> hget binance-sandbox-4db7ef-balance USDT
-"{\"free\": 6515.87905232, \"used\": 0.0, \"total\": 6515.87905232}"
-
-127.0.0.1:6379> hget binance-sandbox-4db7ef-balance BTC
-"{\"free\": 1.2, \"used\": 0.0, \"total\": 1.2}"
-
-127.0.0.1:6379> hget binance-sandbox-4db7ef-balance ETH
-"{\"free\": 100.1, \"used\": 0.0, \"total\": 100.1}"
+curl --location --request POST 'http://localhost:8001/api/v1/exchange/order/' \
+--header 'X-Connection-Id: test-connection-id' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "symbol": "BTCUSDT",
+    "type": "limit",
+    "side": "buy",
+    "amount": 0.001,
+    "price": 20000,
+    "params": {}
+}'
 ```
 
 ### Order Stream
 
 ```
-127.0.0.1:6379> keys *
-1) "binance-sandbox-4db7ef-order-BTCUSDT"
-2) "binance-sandbox-4db7ef-order-ETHUSDT"
+127.0.0.1:6379> hgetall binance-sandbox-test-connection-id-order-BTCUSDT
+1) "7992341"
+2) "{\"info\": {\"e\": \"executionReport\", \"E\": 1673906249569, \"s\": \"BTCUSDT\", \"c\": \"x-R4BD3S825b5e614625b68d98137cf3\", \"S\": \"BUY\", \"o\": \"LIMIT\", \"f\": \"GTC\", \"q\": \"0.00100000\", \"p\": \"20000.00000000\", \"P\": \"0.00000000\", \"F\": \"0.00000000\", \"g\": -1, \"C\": \"\", \"x\": \"NEW\", \"X\": \"NEW\", \"r\": \"NONE\", \"i\": 7992341, \"l\": \"0.00000000\", \"z\": \"0.00000000\", \"L\": \"0.00000000\", \"n\": \"0\", \"N\": null, \"T\": 1673906249569, \"t\": -1, \"I\": 17889024, \"w\": true, \"m\": false, \"M\": false, \"O\": 1673906249569, \"Z\": \"0.00000000\", \"Y\": \"0.00000000\", \"Q\": \"0.00000000\", \"W\": 1673906249569, \"V\": \"NONE\"}, \"symbol\": \"BTC/USDT\", \"id\": \"7992341\", \"clientOrderId\": \"x-R4BD3S825b5e614625b68d98137cf3\", \"timestamp\": 1673906249569, \"datetime\": \"2023-01-16T21:57:29.569Z\", \"lastTradeTimestamp\": null, \"type\": \"limit\", \"timeInForce\": \"GTC\", \"postOnly\": null, \"side\": \"buy\", \"price\": 20000.0, \"stopPrice\": 0.0, \"triggerPrice\": 0.0, \"amount\": 0.001, \"cost\": 0.0, \"average\": null, \"filled\": 0.0, \"remaining\": 0.001, \"status\": \"open\", \"fee\": null, \"trades\": null}"
+```
 
-127.0.0.1:6379> hkeys binance-sandbox-4db7ef-order-BTCUSDT
-1) "5699638"
+### Balance Stream
 
-127.0.0.1:6379> hget binance-sandbox-4db7ef-order-BTCUSDT 5699638
-"{\"info\": {\"e\": \"executionReport\", \"E\": 1671846028770, \"s\": \"BTCUSDT\", \"c\": \"x-R4BD3S82e95ad7340fca4354ed6bec\", \"S\": \"BUY\", \"o\": \"LIMIT\", \"f\": \"GTC\", \"q\": \"0.10000000\", \"p\": \"17000.00000000\", \"P\": \"0.00000000\", \"F\": \"0.00000000\", \"g\": -1, \"C\": \"\", \"x\": \"TRADE\", \"X\": \"FILLED\", \"r\": \"NONE\", \"i\": 5699638, \"l\": \"0.09934600\", \"z\": \"0.10000000\", \"L\": \"16806.21000000\", \"n\": \"0.00000000\", \"N\": \"BTC\", \"T\": 1671846028770, \"t\": 1144309, \"I\": 12541957, \"w\": false, \"m\": false, \"M\": true, \"O\": 1671846028770, \"Z\": \"1680.62098692\", \"Y\": \"1669.62973866\", \"Q\": \"0.00000000\", \"W\": 1671846028770, \"V\": \"NONE\"}, \"symbol\": \"BTC/USDT\", \"id\": \"5699638\", \"clientOrderId\": \"x-R4BD3S82e95ad7340fca4354ed6bec\", \"timestamp\": 1671846028770, \"datetime\": \"2022-12-24T01:40:28.770Z\", \"lastTradeTimestamp\": 1671846028770, \"type\": \"limit\", \"timeInForce\": \"GTC\", \"postOnly\": null, \"side\": \"buy\", \"price\": 17000.0, \"stopPrice\": 0.0, \"amount\": 0.1, \"cost\": 1680.62098692, \"average\": 16806.2098692, \"filled\": 0.1, \"remaining\": 0.0, \"status\": \"closed\", \"fee\": {\"cost\": 0.0, \"currency\": \"BTC\"}, \"trades\": [{\"info\": {\"e\": \"executionReport\", \"E\": 1671846028770, \"s\": \"BTCUSDT\", \"c\": \"x-R4BD3S82e95ad7340fca4354ed6bec\", \"S\": \"BUY\", \"o\": \"LIMIT\", \"f\": \"GTC\", \"q\": \"0.10000000\", \"p\": \"17000.00000000\", \"P\": \"0.00000000\", \"F\": \"0.00000000\", \"g\": -1, \"C\": \"\", \"x\": \"TRADE\", \"X\": \"PARTIALLY_FILLED\", \"r\": \"NONE\", \"i\": 5699638, \"l\": \"0.00065400\", \"z\": \"0.00065400\", \"L\": \"16806.19000000\", \"n\": \"0.00000000\", \"N\": \"BTC\", \"T\": 1671846028770, \"t\": 1144308, \"I\": 12541955, \"w\": false, \"m\": false, \"M\": true, \"O\": 1671846028770, \"Z\": \"10.99124826\", \"Y\": \"10.99124826\", \"Q\": \"0.00000000\", \"W\": 1671846028770, \"V\": \"NONE\"}, \"timestamp\": 1671846028770, \"datetime\": \"2022-12-24T01:40:28.770Z\", \"symbol\": \"BTC/USDT\", \"id\": \"1144308\", \"order\": \"5699638\", \"type\": \"limit\", \"takerOrMaker\": \"taker\", \"side\": \"buy\", \"price\": 16806.19, \"amount\": 0.000654, \"cost\": 10.99124826, \"fee\": {\"cost\": 0.0, \"currency\": \"BTC\"}}, {\"info\": {\"e\": \"executionReport\", \"E\": 1671846028770, \"s\": \"BTCUSDT\", \"c\": \"x-R4BD3S82e95ad7340fca4354ed6bec\", \"S\": \"BUY\", \"o\": \"LIMIT\", \"f\": \"GTC\", \"q\": \"0.10000000\", \"p\": \"17000.00000000\", \"P\": \"0.00000000\", \"F\": \"0.00000000\", \"g\": -1, \"C\": \"\", \"x\": \"TRADE\", \"X\": \"FILLED\", \"r\": \"NONE\", \"i\": 5699638, \"l\": \"0.09934600\", \"z\": \"0.10000000\", \"L\": \"16806.21000000\", \"n\": \"0.00000000\", \"N\": \"BTC\", \"T\": 1671846028770, \"t\": 1144309, \"I\": 12541957, \"w\": false, \"m\": false, \"M\": true, \"O\": 1671846028770, \"Z\": \"1680.62098692\", \"Y\": \"1669.62973866\", \"Q\": \"0.00000000\", \"W\": 1671846028770, \"V\": \"NONE\"}, \"timestamp\": 1671846028770, \"datetime\": \"2022-12-24T01:40:28.770Z\", \"symbol\": \"BTC/USDT\", \"id\": \"1144309\", \"order\": \"5699638\", \"type\": \"limit\", \"takerOrMaker\": \"taker\", \"side\": \"buy\", \"price\": 16806.21, \"amount\": 0.099346, \"cost\": 1669.62973866, \"fee\": {\"cost\": 0.0, \"currency\": \"BTC\"}}]}"
+```
+127.0.0.1:6379> hgetall binance-sandbox-test-connection-id-balance
+ 1) "used"
+ 2) "{\"BTC\": 0.0, \"USDT\": 4260.0}"
+ 3) "USDT"
+ 4) "{\"free\": 940.0, \"used\": 4260.0, \"total\": 5200.0}"
+ 5) "total"
+ 6) "{\"BTC\": 1.3, \"USDT\": 5200.0}"
+ 7) "datetime"
+ 8) "\"2023-01-16T21:57:29.569Z\""
+ 9) "free"
+10) "{\"BTC\": 1.3, \"USDT\": 940.0}"
+11) "info"
+12) "{\"e\": \"outboundAccountPosition\", \"E\": 1673906249569, \"u\": 1673906249569, \"B\": [{\"a\": \"BTC\", \"f\": \"1.30000000\", \"l\": \"0.00000000\"}, {\"a\": \"USDT\", \"f\": \"940.00000000\", \"l\": \"4260.00000000\"}]}"
+13) "timestamp"
+14) "1673906249569"
+15) "BTC"
+16) "{\"free\": 1.3, \"used\": 0.0, \"total\": 1.3}"
 ```
