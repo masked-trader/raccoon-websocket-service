@@ -13,6 +13,7 @@ services:
       - ./.env.development
     environment:
       RACCOON_INTERNAL_CONFIG_API: http://raccoon-configuration:8000/internal/config
+      RACCOON_INTERNAL_EXCHANGE_API: http://raccoon-exchange:8001/internal/exchange
     volumes:
       - ./src/:/workspace/app/
     depends_on:
@@ -34,6 +35,23 @@ services:
     depends_on:
       - redis
       - mongodb
+    restart: unless-stopped
+
+  raccoon-exchange:
+    container_name: raccoon-exchange-service-dev
+    image: masked-trader/exchange-service:dev
+    build:
+      context: github.com/masked-trader/raccoon-exchange-service.git
+      dockerfile: ./Dockerfile
+      target: development
+    environment:
+      RACCOON_EXCHANGE_SERVICE_PORT: 8001
+      RACCOON_INTERNAL_CONFIG_API: http://raccoon-configuration:8000/internal/config
+    ports:
+      - 8001:8001
+    depends_on:
+      - mongodb
+      - raccoon-configuration
     restart: unless-stopped
 
   mongodb:

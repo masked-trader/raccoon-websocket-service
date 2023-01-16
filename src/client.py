@@ -8,7 +8,7 @@ from constants import REDIS_DB, REDIS_HOST, REDIS_PORT
 
 
 @functools.cache
-def get_websocket_client(
+def get_ccxt_pro_client(
     exchange: str, config: str, sandbox: bool = False
 ) -> ccxt.pro.Exchange:
     websocket_cls = getattr(ccxt.pro, exchange)

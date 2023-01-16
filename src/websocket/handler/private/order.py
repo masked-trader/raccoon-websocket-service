@@ -4,7 +4,7 @@ import time
 import typing
 
 from constants import SERVICE_STREAM_LIFETIME_SECONDS
-from util import get_exchange_websocket_client
+from util import get_exchange_websocket_client, update_exchange_order
 from websocket.handler.base import WebsocketHandler
 
 
@@ -15,8 +15,20 @@ class WebsocketOrderHandler(WebsocketHandler):
     def process_msg_order(self, msg: list):
         for data in msg:
             symbol = data["symbol"].replace("/", "")
+
             db_key = self.get_db_key_private(self.handler_type, symbol)
             self.redis.hset(db_key, data["id"], json.dumps(data))
+
+            order_data = {
+                **data,
+                "symbol": symbol,
+                "orderId": data["id"],
+                "connection": self.connection_id,
+            }
+
+            del order_data["id"]
+
+            update_exchange_order(self.connection_id, order_data)
 
     async def manage_streams(self):
         self.add_subscription(self.handler_type)

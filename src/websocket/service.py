@@ -22,7 +22,7 @@ class WebsocketService:
     async def start(self):
         client = get_exchange_websocket_client(self.connection_id)
 
-        self.logger.info("starting websocket service %s", self.connection_id)
+        self.logger.info("starting service")
 
         try:
             await asyncio.gather(
@@ -36,14 +36,14 @@ class WebsocketService:
             self.logger.exception(e)
 
         except KeyboardInterrupt:
-            self.logger.info("websocket service manual shutdown")
+            self.logger.info("service manual shutdown")
 
         finally:
             await client.close()
             self.logger.info("connection closed")
 
     async def stop(self):
-        self.logger.info("websocket service stopping %s", self.connection_id)
+        self.logger.info("stopping service")
 
         client = get_exchange_websocket_client(self.connection_id)
         await client.close()
