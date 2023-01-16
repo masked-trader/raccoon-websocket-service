@@ -13,8 +13,8 @@ def get_exchange_connection_config(connection_id: str) -> dict:
     return requests.get(f"{INTERNAL_CONFIG_API_URL}/connection/{connection_id}/").json()
 
 
-def update_exchange_order(connection_id: str, data: dict):
-    return requests.patch(
+def sync_order_with_database(connection_id: str, data: dict):
+    return requests.post(
         f"{INTERNAL_EXCHANGE_API_URL}/order/",
         headers={"X-Connection-Id": connection_id},
         json=data,
