@@ -32,12 +32,13 @@ curl --location --request POST 'http://localhost:8000/api/v1/config/connection/'
     "sandbox": true,
     "options": {}
 }'
-
 ```
 
 ## Public Stream Subscriptions
 
 ### Ticker Stream
+
+Subscribe to websocket ticker stream
 
 ```
 curl --location --request POST 'http://localhost:8000/api/v1/config/subscription/ticker/' \
@@ -47,6 +48,8 @@ curl --location --request POST 'http://localhost:8000/api/v1/config/subscription
     "symbol": "BTCUSDT"
 }'
 ```
+
+Verify data collection in Redis
 
 ```
 docker compose exec redis redis-cli
@@ -59,6 +62,8 @@ docker compose exec redis redis-cli
 
 ### Kline Stream
 
+Subscribe to websocket kline stream
+
 ```
 curl --location --request POST 'http://localhost:8000/api/v1/config/subscription/kline/' \
 --header 'X-Connection-Id: test-connection-id' \
@@ -68,6 +73,8 @@ curl --location --request POST 'http://localhost:8000/api/v1/config/subscription
     "interval": "5m"
 }'
 ```
+
+Verify data collection in Redis
 
 ```
 docker compose exec redis redis-cli
@@ -95,11 +102,13 @@ docker compose exec redis redis-cli
 2) 22.270596
 ```
 
-## Private Stream Subscriptions
+## Private Stream Subscriptions.
 
-Private API data is stored with keys that include the connection ID, making the keys unique for each connection.
+Private streams are automatically subscribed on submitting connection configuration
 
 ### Generate Data
+
+Create an order to generate user account data
 
 ```
 curl --location --request POST 'http://localhost:8001/api/v1/exchange/order/' \
@@ -117,30 +126,44 @@ curl --location --request POST 'http://localhost:8001/api/v1/exchange/order/' \
 
 ### Order Stream
 
+Verify data collection in Redis
+
+```
+docker compose exec redis redis-cli
+```
+
 ```
 127.0.0.1:6379> hgetall binance-sandbox-test-connection-id-order-BTCUSDT
 1) "7992341"
 2) "{\"info\": {\"e\": \"executionReport\", \"E\": 1673906249569, \"s\": \"BTCUSDT\", \"c\": \"x-R4BD3S825b5e614625b68d98137cf3\", \"S\": \"BUY\", \"o\": \"LIMIT\", \"f\": \"GTC\", \"q\": \"0.00100000\", \"p\": \"20000.00000000\", \"P\": \"0.00000000\", \"F\": \"0.00000000\", \"g\": -1, \"C\": \"\", \"x\": \"NEW\", \"X\": \"NEW\", \"r\": \"NONE\", \"i\": 7992341, \"l\": \"0.00000000\", \"z\": \"0.00000000\", \"L\": \"0.00000000\", \"n\": \"0\", \"N\": null, \"T\": 1673906249569, \"t\": -1, \"I\": 17889024, \"w\": true, \"m\": false, \"M\": false, \"O\": 1673906249569, \"Z\": \"0.00000000\", \"Y\": \"0.00000000\", \"Q\": \"0.00000000\", \"W\": 1673906249569, \"V\": \"NONE\"}, \"symbol\": \"BTC/USDT\", \"id\": \"7992341\", \"clientOrderId\": \"x-R4BD3S825b5e614625b68d98137cf3\", \"timestamp\": 1673906249569, \"datetime\": \"2023-01-16T21:57:29.569Z\", \"lastTradeTimestamp\": null, \"type\": \"limit\", \"timeInForce\": \"GTC\", \"postOnly\": null, \"side\": \"buy\", \"price\": 20000.0, \"stopPrice\": 0.0, \"triggerPrice\": 0.0, \"amount\": 0.001, \"cost\": 0.0, \"average\": null, \"filled\": 0.0, \"remaining\": 0.001, \"status\": \"open\", \"fee\": null, \"trades\": null}"
 ```
 
+Verify data collection in exchange service
+
+```
+curl --location --request GET 'http://localhost:8001/api/v1/exchange/order/BTCUSDT/' \
+--header 'X-Connection-Id: test-connection-id'
+```
+
 ### Balance Stream
+
+Verify data collection in Redis
+
+```
+docker compose exec redis redis-cli
+```
 
 ```
 127.0.0.1:6379> hgetall binance-sandbox-test-connection-id-balance
- 1) "used"
- 2) "{\"BTC\": 0.0, \"USDT\": 4260.0}"
- 3) "USDT"
- 4) "{\"free\": 940.0, \"used\": 4260.0, \"total\": 5200.0}"
- 5) "total"
- 6) "{\"BTC\": 1.3, \"USDT\": 5200.0}"
- 7) "datetime"
- 8) "\"2023-01-16T21:57:29.569Z\""
- 9) "free"
-10) "{\"BTC\": 1.3, \"USDT\": 940.0}"
-11) "info"
-12) "{\"e\": \"outboundAccountPosition\", \"E\": 1673906249569, \"u\": 1673906249569, \"B\": [{\"a\": \"BTC\", \"f\": \"1.30000000\", \"l\": \"0.00000000\"}, {\"a\": \"USDT\", \"f\": \"940.00000000\", \"l\": \"4260.00000000\"}]}"
-13) "timestamp"
-14) "1673906249569"
-15) "BTC"
-16) "{\"free\": 1.3, \"used\": 0.0, \"total\": 1.3}"
+1) "BTC"
+2) "{\"free\": 1.513, \"used\": 0.0, \"total\": 1.513}"
+3) "USDT"
+4) "{\"free\": 820.0, \"used\": 120.0, \"total\": 940.0}"
+```
+
+Verify data collection in exchange service
+
+```
+curl --location --request GET 'http://localhost:8001/api/v1/exchange/market/ticker/BTCUSDT/' \
+--header 'X-Connection-Id: test-connection-id'
 ```
