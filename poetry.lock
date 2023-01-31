@@ -86,7 +86,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "ccxt"
-version = "2.6.23"
+version = "2.7.23"
 description = "A JavaScript / Python / PHP cryptocurrency trading library with support for 130+ exchanges"
 category = "main"
 optional = false
@@ -228,7 +228,7 @@ python-versions = "*"
 
 [[package]]
 name = "pathspec"
-version = "0.10.3"
+version = "0.11.0"
 description = "Utility library for gitignore style pattern matching of file paths."
 category = "dev"
 optional = false
@@ -319,7 +319,7 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "setuptools"
-version = "65.7.0"
+version = "67.0.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "main"
 optional = false
@@ -489,8 +489,8 @@ black = [
     {file = "black-22.12.0.tar.gz", hash = "sha256:229351e5a18ca30f447bf724d007f890f97e13af070bb6ad4c0a441cd7596a2f"},
 ]
 ccxt = [
-    {file = "ccxt-2.6.23-py2.py3-none-any.whl", hash = "sha256:6b172dec8d50fb677f57eec6f5a74e7bb421c08d4651799a2f49c7eeb1db6d10"},
-    {file = "ccxt-2.6.23.tar.gz", hash = "sha256:cdd1c041cbb656509deb162d1e775973662406c4febf9f135ee11746f4d6bf91"},
+    {file = "ccxt-2.7.23-py2.py3-none-any.whl", hash = "sha256:a8424e68ff33b96aa1df5bf8bf0b68ece6abd05ed1dd886d0703f9a540b22c99"},
+    {file = "ccxt-2.7.23.tar.gz", hash = "sha256:2c9226b0e92f9fbcf43463d1bc727270e76b68255f1c0c2c3d8a900fbe2cf97e"},
 ]
 certifi = [
     {file = "certifi-2022.12.7-py3-none-any.whl", hash = "sha256:4ad3232f5e926d6718ec31cfc1fcadfde020920e278684144551c91769c7bc18"},
@@ -768,8 +768,8 @@ mypy-extensions = [
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 pathspec = [
-    {file = "pathspec-0.10.3-py3-none-any.whl", hash = "sha256:3c95343af8b756205e2aba76e843ba9520a24dd84f68c22b9f93251507509dd6"},
-    {file = "pathspec-0.10.3.tar.gz", hash = "sha256:56200de4077d9d0791465aa9095a01d421861e405b5096955051deefd697d6f6"},
+    {file = "pathspec-0.11.0-py3-none-any.whl", hash = "sha256:3a66eb970cbac598f9e5ccb5b2cf58930cd8e3ed86d393d541eaf2d8b1705229"},
+    {file = "pathspec-0.11.0.tar.gz", hash = "sha256:64d338d4e0914e91c1792321e6907b5a593f1ab1851de7fc269557a21b30ebbc"},
 ]
 platformdirs = [
     {file = "platformdirs-2.6.2-py3-none-any.whl", hash = "sha256:83c8f6d04389165de7c9b6f0c682439697887bca0aa2f1c87ef1826be3584490"},
@@ -850,8 +850,8 @@ requests = [
     {file = "requests-2.28.2.tar.gz", hash = "sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf"},
 ]
 setuptools = [
-    {file = "setuptools-65.7.0-py3-none-any.whl", hash = "sha256:8ab4f1dbf2b4a65f7eec5ad0c620e84c34111a68d3349833494b9088212214dd"},
-    {file = "setuptools-65.7.0.tar.gz", hash = "sha256:4d3c92fac8f1118bb77a22181355e29c239cabfe2b9effdaa665c66b711136d7"},
+    {file = "setuptools-67.0.0-py3-none-any.whl", hash = "sha256:9d790961ba6219e9ff7d9557622d2fe136816a264dd01d5997cfc057d804853d"},
+    {file = "setuptools-67.0.0.tar.gz", hash = "sha256:883131c5b6efa70b9101c7ef30b2b7b780a4283d5fc1616383cdf22c83cbefe6"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
