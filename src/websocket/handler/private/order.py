@@ -3,8 +3,9 @@ import json
 import time
 import typing
 
+from client import get_ccxt_pro_client
 from constants import SERVICE_STREAM_LIFETIME_SECONDS
-from util import get_exchange_websocket_client, sync_order_with_database
+from internal import internal_update_order_data
 from websocket.handler.base import WebsocketHandler
 
 
@@ -28,7 +29,9 @@ class WebsocketOrderHandler(WebsocketHandler):
 
             del order_data["id"]
 
-            sync_order_with_database(self.connection_id, order_data)
+            self.dispatch_task(
+                lambda: internal_update_order_data(self.connection_id, order_data)
+            )
 
     async def manage_streams(self):
         self.add_subscription(self.handler_type)
@@ -36,9 +39,7 @@ class WebsocketOrderHandler(WebsocketHandler):
         while True:
             if not self.get_subscription(self.handler_type):
                 self.update_subscription(self.handler_type, status=True)
-
-                loop = asyncio.get_running_loop()
-                loop.create_task(self.handle_order_stream())
+                self.dispatch_task(lambda: self.handle_order_stream())
 
             await asyncio.sleep(3)
 
@@ -51,7 +52,7 @@ class WebsocketOrderHandler(WebsocketHandler):
     ):
         reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_exchange_websocket_client(self.connection_id)
+        client = get_ccxt_pro_client(self.connection_id)
 
         if since is not None:
             since = client.iso8601(since)

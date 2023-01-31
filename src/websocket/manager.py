@@ -2,9 +2,9 @@ import asyncio
 import logging
 
 from client import get_redis_client
-from constants import INTERNAL_CONNECTION_CONFIG_KEY
-from util import get_exchange_connection_config, get_exchange_websocket_client
 from websocket.service import WebsocketService
+
+INTERNAL_CONNECTION_CONFIG_KEY = "connection-config"
 
 
 class WebsocketServiceManager:
@@ -19,12 +19,12 @@ class WebsocketServiceManager:
             await self.manage_services()
             await asyncio.sleep(5)
 
-    async def get_connection_ids(self):
-        connection_ids = self.redis.hgetall(INTERNAL_CONNECTION_CONFIG_KEY)
+    def get_connection_configuration_ids(self) -> list:
+        connection_ids = self.redis.smembers(INTERNAL_CONNECTION_CONFIG_KEY)
         return [connection_id.decode() for connection_id in connection_ids]
 
     async def manage_services(self):
-        connection_ids = await self.get_connection_ids()
+        connection_ids = self.get_connection_configuration_ids()
 
         for remote_connection_id in connection_ids:
             if remote_connection_id not in self.services:
@@ -50,7 +50,5 @@ class WebsocketServiceManager:
         service: WebsocketService = self.services[connection_id]
 
         await service.stop()
-        del self.services[connection_id]
 
-        get_exchange_connection_config.cache_clear()
-        get_exchange_websocket_client.cache_clear()
+        del self.services[connection_id]

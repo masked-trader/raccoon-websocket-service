@@ -1,14 +1,15 @@
+import asyncio
 import logging
 
 from client import get_redis_client
-from util import get_exchange_connection_config
+from internal import internal_retrieve_connection_config
 
 STATUS_ACTIVE = "active"
 STATUS_INACTIVE = "inactive"
 
 
 def get_connection_name(connection_id: str):
-    config = get_exchange_connection_config(connection_id)
+    config = internal_retrieve_connection_config(connection_id)
 
     return (
         "-".join([config["exchange"], "sandbox"])
@@ -49,6 +50,10 @@ class WebsocketHandler:
 
     def get_subscriptions(self):
         return dict(self.subscriptions)
+
+    def dispatch_task(self, func):
+        loop = asyncio.get_running_loop()
+        loop.create_task(func())
 
     def manage_subscriptions(self, db_key: str):
         db_subs = {sub.decode() for sub in self.redis.smembers(db_key)}

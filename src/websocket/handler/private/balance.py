@@ -3,9 +3,14 @@ import json
 import time
 import typing
 
+from client import get_ccxt_pro_client
 from constants import SERVICE_STREAM_LIFETIME_SECONDS
-from util import get_exchange_websocket_client
+from internal import internal_update_balance_data
 from websocket.handler.base import WebsocketHandler
+
+MESSAGE_KEY_FREE = "free"
+MESSAGE_KEY_USED = "used"
+MESSAGE_KEY_TOTAL = "total"
 
 
 class WebsocketBalanceHandler(WebsocketHandler):
@@ -15,8 +20,25 @@ class WebsocketBalanceHandler(WebsocketHandler):
     def process_msg_balance(self, msg: dict):
         db_key = self.get_db_key_private(self.handler_type)
 
-        for key, value in msg.items():
-            self.redis.hset(db_key, key, json.dumps(value))
+        for asset in msg[MESSAGE_KEY_TOTAL].keys():
+            balance_data = {
+                "free": msg[MESSAGE_KEY_FREE][asset],
+                "used": msg[MESSAGE_KEY_USED][asset],
+                "total": msg[MESSAGE_KEY_TOTAL][asset],
+            }
+
+            self.redis.hset(db_key, asset, json.dumps(balance_data))
+
+            self.dispatch_task(
+                lambda: internal_update_balance_data(
+                    self.connection_id,
+                    {
+                        **balance_data,
+                        "asset": asset,
+                        "connection": self.connection_id,
+                    },
+                )
+            )
 
     async def manage_streams(self):
         self.add_subscription(self.handler_type)
@@ -24,16 +46,14 @@ class WebsocketBalanceHandler(WebsocketHandler):
         while True:
             if not self.get_subscription(self.handler_type):
                 self.update_subscription(self.handler_type, status=True)
-
-                loop = asyncio.get_running_loop()
-                loop.create_task(self.handle_balance_stream())
+                self.dispatch_task(lambda: self.handle_balance_stream())
 
             await asyncio.sleep(3)
 
     async def handle_balance_stream(self, params: typing.Optional[dict] = None):
         reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_exchange_websocket_client(self.connection_id)
+        client = get_ccxt_pro_client(self.connection_id)
 
         if params is None:
             params = {}

@@ -3,8 +3,8 @@ import json
 import time
 import typing
 
+from client import get_ccxt_pro_client
 from constants import SERVICE_STREAM_LIFETIME_SECONDS
-from util import get_exchange_websocket_client
 from websocket.handler.base import WebsocketHandler
 
 
@@ -27,9 +27,7 @@ class WebsocketTickerHandler(WebsocketHandler):
             for sub_key, running in subscription.items():
                 if not running:
                     self.update_subscription(sub_key=sub_key, status=True)
-
-                    loop = asyncio.get_running_loop()
-                    loop.create_task(self.handle_ticker_stream(sub_key))
+                    self.dispatch_task(lambda: self.handle_ticker_stream(sub_key))
 
             await asyncio.sleep(3)
 
@@ -38,7 +36,7 @@ class WebsocketTickerHandler(WebsocketHandler):
     ):
         reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_exchange_websocket_client(self.connection_id)
+        client = get_ccxt_pro_client(self.connection_id)
 
         if params is None:
             params = {}

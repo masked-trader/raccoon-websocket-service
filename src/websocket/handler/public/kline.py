@@ -2,12 +2,12 @@ import asyncio
 import time
 import typing
 
+from client import get_ccxt_pro_client
 from constants import (
     REDIS_TIME_SERIES_DUPLICATE_POLICY,
     REDIS_TIME_SERIES_RETENTION_SECONDS,
     SERVICE_STREAM_LIFETIME_SECONDS,
 )
-from util import get_exchange_websocket_client
 from websocket.handler.base import WebsocketHandler
 
 TIME_SERIES_OPEN = "open"
@@ -39,9 +39,9 @@ class WebsocketKlineHandler(WebsocketHandler):
             for sub_key, running in subscription.items():
                 if not running:
                     self.update_subscription(sub_key=sub_key, status=True)
-
-                    loop = asyncio.get_running_loop()
-                    loop.create_task(self.handle_kline_stream(sub_key=sub_key))
+                    self.dispatch_task(
+                        lambda: self.handle_kline_stream(sub_key=sub_key)
+                    )
 
             await asyncio.sleep(3)
 
@@ -55,7 +55,7 @@ class WebsocketKlineHandler(WebsocketHandler):
         symbol, interval = sub_key.split("-")
         reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
 
-        client = get_exchange_websocket_client(self.connection_id)
+        client = get_ccxt_pro_client(self.connection_id)
 
         if params is None:
             params = {}

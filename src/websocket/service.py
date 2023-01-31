@@ -1,7 +1,8 @@
 import asyncio
 import logging
 
-from util import get_exchange_websocket_client
+from client import get_ccxt_pro_client
+from internal import internal_retrieve_connection_config
 from websocket.handler.private.balance import WebsocketBalanceHandler
 from websocket.handler.private.order import WebsocketOrderHandler
 from websocket.handler.public.kline import WebsocketKlineHandler
@@ -20,7 +21,7 @@ class WebsocketService:
         self.balance_handler = WebsocketBalanceHandler(connection_id)
 
     async def start(self):
-        client = get_exchange_websocket_client(self.connection_id)
+        client = get_ccxt_pro_client(self.connection_id)
 
         self.logger.info("starting service")
 
@@ -40,10 +41,15 @@ class WebsocketService:
 
         finally:
             await client.close()
+
+            get_ccxt_pro_client.cache_clear()
+            internal_retrieve_connection_config.cache_clear()
+
             self.logger.info("connection closed")
 
     async def stop(self):
         self.logger.info("stopping service")
 
-        client = get_exchange_websocket_client(self.connection_id)
+        client = get_ccxt_pro_client(self.connection_id)
+
         await client.close()
