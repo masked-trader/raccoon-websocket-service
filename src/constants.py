@@ -1,13 +1,8 @@
 import os
 
 # internal
-INTERNAL_EXCHANGE_API_URL = os.getenv(
-    "RACCOON_INTERNAL_EXCHANGE_API", "http://localhost:8001/internal/exchange"
-)
-
-INTERNAL_CONFIG_API_URL = os.getenv(
-    "RACCOON_INTERNAL_CONFIG_API", "http://localhost:8000/internal/config"
-)
+INTERNAL_SSL_VERIFY = bool(int(os.getenv("RACCOON_INTERNAL_SSL_VERIFY", 0)))
+INTERNAL_API_BASE_URL = os.getenv("RACCOON_INTERNAL_API_BASE_URL", "localhost:5284")
 
 # redis
 REDIS_HOST = os.getenv("RACCOON_REDIS_HOST", "localhost")

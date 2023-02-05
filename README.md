@@ -22,7 +22,7 @@ Generate API keys for testing
 [https://testnet.binance.vision/](https://testnet.binance.vision/)
 
 ```
-curl --location --request POST 'http://localhost:8000/api/v1/config/connection/' \
+curl --location --request POST 'http://localhost/api/v1/config/connection/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "id": "test-connection-id",
@@ -41,7 +41,7 @@ curl --location --request POST 'http://localhost:8000/api/v1/config/connection/'
 Subscribe to websocket ticker stream
 
 ```
-curl --location --request POST 'http://localhost:8000/api/v1/config/subscription/ticker/' \
+curl --location --request POST 'http://localhost/api/v1/config/subscription/ticker/' \
 --header 'X-Connection-Id: test-connection-id' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -65,7 +65,7 @@ docker compose exec redis redis-cli
 Subscribe to websocket kline stream
 
 ```
-curl --location --request POST 'http://localhost:8000/api/v1/config/subscription/kline/' \
+curl --location --request POST 'http://localhost/api/v1/config/subscription/kline/' \
 --header 'X-Connection-Id: test-connection-id' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -111,7 +111,7 @@ Private streams are automatically subscribed on submitting connection configurat
 Create an order to generate user account data
 
 ```
-curl --location --request POST 'http://localhost:8001/api/v1/exchange/order/' \
+curl --location --request POST 'http://localhost/api/v1/exchange/order/' \
 --header 'X-Connection-Id: test-connection-id' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -141,7 +141,7 @@ docker compose exec redis redis-cli
 Verify data collection in exchange service
 
 ```
-curl --location --request GET 'http://localhost:8001/api/v1/exchange/order/BTCUSDT/' \
+curl --location --request GET 'http://localhost/api/v1/exchange/order/BTCUSDT/' \
 --header 'X-Connection-Id: test-connection-id'
 ```
 
@@ -164,6 +164,6 @@ docker compose exec redis redis-cli
 Verify data collection in exchange service
 
 ```
-curl --location --request GET 'http://localhost:8001/api/v1/exchange/market/ticker/BTCUSDT/' \
+curl --location --request GET 'http://localhost/api/v1/exchange/market/ticker/BTCUSDT/' \
 --header 'X-Connection-Id: test-connection-id'
 ```

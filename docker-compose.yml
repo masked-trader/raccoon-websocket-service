@@ -11,14 +11,27 @@ services:
       target: development
     env_file:
       - ./.env.development
-    environment:
-      RACCOON_INTERNAL_CONFIG_API: http://raccoon-configuration:8000/internal/config
-      RACCOON_INTERNAL_EXCHANGE_API: http://raccoon-exchange:8001/internal/exchange
     volumes:
       - ./src/:/workspace/app/
+    networks:
+      - raccoon-proxy-network-dev
+      - raccoon-websocket-network-dev
     depends_on:
       - redis
       - raccoon-configuration
+    restart: unless-stopped
+
+  raccoon-proxy:
+    container_name: raccoon-proxy-service-dev
+    image: nginx
+    ports:
+      - 80:80
+      - 5284:5284
+    volumes:
+      - ./files/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./files/nginx/snippets:/etc/nginx/snippets:ro
+    networks:
+      - raccoon-proxy-network-dev
     restart: unless-stopped
 
   raccoon-configuration:
@@ -30,11 +43,12 @@ services:
       target: development
     environment:
       RACCOON_REDIS_HOST: redis
-    ports:
-      - 8000:8000
     depends_on:
       - redis
       - mongodb
+    networks:
+      - raccoon-proxy-network-dev
+      - raccoon-config-network-dev
     restart: unless-stopped
 
   raccoon-exchange:
@@ -44,14 +58,11 @@ services:
       context: github.com/masked-trader/raccoon-exchange-service.git
       dockerfile: ./Dockerfile
       target: development
-    environment:
-      RACCOON_EXCHANGE_SERVICE_PORT: 8001
-      RACCOON_INTERNAL_CONFIG_API: http://raccoon-configuration:8000/internal/config
-    ports:
-      - 8001:8001
     depends_on:
       - mongodb
-      - raccoon-configuration
+    networks:
+      - raccoon-proxy-network-dev
+      - raccoon-exchange-network-dev
     restart: unless-stopped
 
   mongodb:
@@ -61,11 +72,13 @@ services:
       MONGO_INITDB_DATABASE: raccoon
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    ports:
-      - 27017:27017
     volumes:
       - mongodb-data-dev:/data/db
       - mongodb-data-dev:/data/configdb
+    networks:
+      - raccoon-config-network-dev
+      - raccoon-exchange-network-dev
+      - raccoon-mongo-express-network-dev
     restart: unless-stopped
 
   mongo-express:
@@ -79,6 +92,8 @@ services:
       ME_CONFIG_BASICAUTH_PASSWORD: admin
     ports:
       - 8081:8081
+    networks:
+      - raccoon-mongo-express-network-dev
     depends_on:
       - mongodb
     restart: unless-stopped
@@ -88,11 +103,19 @@ services:
     image: redislabs/redistimeseries
     restart: unless-stopped
     command: redis-server --save "" --appendonly no --loadmodule /usr/lib/redis/modules/redistimeseries.so
-    ports:
-      - 6379:6379
+    networks:
+      - raccoon-config-network-dev
+      - raccoon-websocket-network-dev
     volumes:
       - redis-data-dev:/data/
 
 volumes:
-  mongodb-data-dev: null
   redis-data-dev: null
+  mongodb-data-dev: null
+
+networks:
+  raccoon-proxy-network-dev:
+  raccoon-config-network-dev:
+  raccoon-exchange-network-dev:
+  raccoon-websocket-network-dev:
+  raccoon-mongo-express-network-dev:
