@@ -4,8 +4,8 @@ import time
 import typing
 
 from client import get_ccxt_pro_client
-from constants import SERVICE_STREAM_LIFETIME_SECONDS
 from internal import internal_update_balance_data
+from settings import settings
 from websocket.handler.base import WebsocketHandler
 
 MESSAGE_KEY_FREE = "free"
@@ -51,7 +51,7 @@ class WebsocketBalanceHandler(WebsocketHandler):
             await asyncio.sleep(3)
 
     async def handle_balance_stream(self, params: typing.Optional[dict] = None):
-        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + settings.service_stream_lifetime_seconds
 
         client = get_ccxt_pro_client(self.connection_id)
 

@@ -3,13 +3,13 @@ import functools
 import ccxt.pro
 import redis
 
-from constants import REDIS_DB, REDIS_HOST, REDIS_PORT
 from internal import internal_retrieve_connection_config
+from settings import settings
 
 
 @functools.cache
 def get_redis_client() -> redis.Redis:
-    return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+    return redis.Redis.from_url(settings.redis_connection_url)
 
 
 @functools.cache

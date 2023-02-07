@@ -3,11 +3,7 @@ import time
 import typing
 
 from client import get_ccxt_pro_client
-from constants import (
-    REDIS_TIME_SERIES_DUPLICATE_POLICY,
-    REDIS_TIME_SERIES_RETENTION_SECONDS,
-    SERVICE_STREAM_LIFETIME_SECONDS,
-)
+from settings import settings
 from websocket.handler.base import WebsocketHandler
 
 TIME_SERIES_OPEN = "open"
@@ -53,7 +49,7 @@ class WebsocketKlineHandler(WebsocketHandler):
         params: typing.Optional[dict] = None,
     ):
         symbol, interval = sub_key.split("-")
-        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + settings.service_stream_lifetime_seconds
 
         client = get_ccxt_pro_client(self.connection_id)
 
@@ -103,32 +99,32 @@ class WebsocketKlineHandler(WebsocketHandler):
 
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_OPEN),
-            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
-            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
+            duplicate_policy=settings.redis_time_series_duplicate_policy,
+            retention_msecs=settings.redis_time_series_retention_seconds,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_HIGH),
-            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
-            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
+            duplicate_policy=settings.redis_time_series_duplicate_policy,
+            retention_msecs=settings.redis_time_series_retention_seconds,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_LOW),
-            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
-            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
+            duplicate_policy=settings.redis_time_series_duplicate_policy,
+            retention_msecs=settings.redis_time_series_retention_seconds,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_CLOSE),
-            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
-            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
+            duplicate_policy=settings.redis_time_series_duplicate_policy,
+            retention_msecs=settings.redis_time_series_retention_seconds,
             labels=labels,
         )
         ts.create(
             self.get_kline_time_series_key(market, interval, TIME_SERIES_VOLUME),
-            duplicate_policy=REDIS_TIME_SERIES_DUPLICATE_POLICY,
-            retention_msecs=REDIS_TIME_SERIES_RETENTION_SECONDS,
+            duplicate_policy=settings.redis_time_series_duplicate_policy,
+            retention_msecs=settings.redis_time_series_retention_seconds,
             labels=labels,
         )
 

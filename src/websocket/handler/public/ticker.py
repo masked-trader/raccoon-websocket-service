@@ -4,7 +4,7 @@ import time
 import typing
 
 from client import get_ccxt_pro_client
-from constants import SERVICE_STREAM_LIFETIME_SECONDS
+from settings import settings
 from websocket.handler.base import WebsocketHandler
 
 
@@ -34,7 +34,7 @@ class WebsocketTickerHandler(WebsocketHandler):
     async def handle_ticker_stream(
         self, sub_key: str, params: typing.Optional[dict] = None
     ):
-        reset_timestamp = time.time() + SERVICE_STREAM_LIFETIME_SECONDS
+        reset_timestamp = time.time() + settings.service_stream_lifetime_seconds
 
         client = get_ccxt_pro_client(self.connection_id)
 

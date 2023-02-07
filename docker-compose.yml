@@ -42,7 +42,8 @@ services:
       dockerfile: ./Dockerfile
       target: development
     environment:
-      RACCOON_REDIS_HOST: redis
+      RACCOON_REDIS_CONNECTION_URL: redis://redis:6379/0
+      RACCOON_MONGO_CONNECTION_URL: mongodb://root:rootpassword@mongodb:27017
     depends_on:
       - redis
       - mongodb
@@ -58,6 +59,9 @@ services:
       context: github.com/masked-trader/raccoon-exchange-service.git
       dockerfile: ./Dockerfile
       target: development
+    environment:
+      RACCOON_INTERNAL_API_BASE_URL: http://raccoon-proxy:5284
+      RACCOON_MONGO_CONNECTION_URL: mongodb://root:rootpassword@mongodb:27017
     depends_on:
       - mongodb
     networks:

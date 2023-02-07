@@ -2,30 +2,30 @@ import functools
 
 import requests
 
-from constants import INTERNAL_API_BASE_URL, INTERNAL_SSL_VERIFY
+from settings import settings
 
 
 @functools.cache
 def internal_retrieve_connection_config(connection_id: str) -> dict:
     return requests.get(
-        f"{INTERNAL_API_BASE_URL}/internal/config/connection/{connection_id}/",
-        verify=INTERNAL_SSL_VERIFY,
+        f"{settings.internal_api_base_url}/internal/config/connection/{connection_id}/",
+        verify=settings.internal_ssl_verify,
     ).json()
 
 
 async def internal_update_balance_data(connection_id: str, data: dict):
     return requests.post(
-        f"{INTERNAL_API_BASE_URL}/internal/exchange/balance/",
+        f"{settings.internal_api_base_url}/internal/exchange/balance/",
         headers={"X-Connection-Id": connection_id},
-        verify=INTERNAL_SSL_VERIFY,
+        verify=settings.internal_ssl_verify,
         json=data,
     )
 
 
 async def internal_update_order_data(connection_id: str, data: dict):
     return requests.post(
-        f"{INTERNAL_API_BASE_URL}/internal/exchange/order/",
+        f"{settings.internal_api_base_url}/internal/exchange/order/",
         headers={"X-Connection-Id": connection_id},
-        verify=INTERNAL_SSL_VERIFY,
+        verify=settings.internal_ssl_verify,
         json=data,
     )

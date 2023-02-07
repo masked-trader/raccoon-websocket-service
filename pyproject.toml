@@ -11,6 +11,7 @@ python = "^3.10"
 ccxt = "^2.2.25"
 redis = "^4.3.5"
 requests = "^2.28.2"
+pydantic = "^1.10.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
