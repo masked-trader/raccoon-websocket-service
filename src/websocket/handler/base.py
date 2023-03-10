@@ -59,10 +59,10 @@ class WebsocketHandler:
         db_subs = {sub.decode() for sub in self.redis.smembers(db_key)}
 
         for db_sub in db_subs:
-            if db_sub not in self.subscriptions:
+            if db_sub not in dict(self.subscriptions):
                 self.add_subscription(db_sub)
 
-        for local_sub in self.subscriptions:
+        for local_sub in dict(self.subscriptions):
             if local_sub not in db_subs:
                 self.remove_subscription(local_sub)
 

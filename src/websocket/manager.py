@@ -27,10 +27,10 @@ class WebsocketServiceManager:
         connection_ids = self.get_connection_configuration_ids()
 
         for remote_connection_id in connection_ids:
-            if remote_connection_id not in self.services:
+            if remote_connection_id not in dict(self.services):
                 await self.start_service(remote_connection_id)
 
-        for local_connection_id in self.services:
+        for local_connection_id in dict(self.services):
             if local_connection_id not in connection_ids:
                 await self.stop_service(local_connection_id)
 
