@@ -3,7 +3,7 @@ import functools
 import ccxt.pro
 import redis
 
-from internal import internal_retrieve_connection_config
+from api import internal_retrieve_connection_config
 from settings import settings
 
 

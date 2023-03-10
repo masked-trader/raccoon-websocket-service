@@ -3,8 +3,8 @@ import json
 import time
 import typing
 
+from api import internal_update_balance_data
 from client import get_ccxt_pro_client
-from internal import internal_update_balance_data
 from settings import settings
 from websocket.handler.base import WebsocketHandler
 

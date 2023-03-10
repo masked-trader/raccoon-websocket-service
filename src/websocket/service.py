@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
+from api import internal_retrieve_connection_config
 from client import get_ccxt_pro_client
-from internal import internal_retrieve_connection_config
 from websocket.handler.private.balance import WebsocketBalanceHandler
 from websocket.handler.private.order import WebsocketOrderHandler
 from websocket.handler.public.kline import WebsocketKlineHandler

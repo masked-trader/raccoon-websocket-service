@@ -15,7 +15,7 @@ def internal_retrieve_connection_config(connection_id: str) -> dict:
 
 async def internal_update_balance_data(connection_id: str, data: dict):
     return requests.post(
-        f"{settings.internal_api_base_url}/internal/exchange/balance/",
+        f"{settings.internal_api_base_url}/internal/exchange/balance/sync/",
         headers={"X-Connection-Id": connection_id},
         verify=settings.internal_ssl_verify,
         json=data,
@@ -24,7 +24,7 @@ async def internal_update_balance_data(connection_id: str, data: dict):
 
 async def internal_update_order_data(connection_id: str, data: dict):
     return requests.post(
-        f"{settings.internal_api_base_url}/internal/exchange/order/",
+        f"{settings.internal_api_base_url}/internal/exchange/order/sync/",
         headers={"X-Connection-Id": connection_id},
         verify=settings.internal_ssl_verify,
         json=data,

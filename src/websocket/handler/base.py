@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
+from api import internal_retrieve_connection_config
 from client import get_redis_client
-from internal import internal_retrieve_connection_config
 
 STATUS_ACTIVE = "active"
 STATUS_INACTIVE = "inactive"
