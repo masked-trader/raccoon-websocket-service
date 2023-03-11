@@ -18,7 +18,7 @@ services:
       - raccoon-websocket-network-dev
     depends_on:
       - redis
-      - raccoon-configuration
+      - raccoon-exchange
     restart: unless-stopped
 
   raccoon-proxy:
@@ -34,24 +34,6 @@ services:
       - raccoon-proxy-network-dev
     restart: unless-stopped
 
-  raccoon-configuration:
-    container_name: raccoon-configuration-service-dev
-    image: masked-trader/configuration-service:dev
-    build:
-      context: github.com/masked-trader/raccoon-configuration-service.git
-      dockerfile: ./Dockerfile
-      target: development
-    environment:
-      RACCOON_REDIS_CONNECTION_URL: redis://redis:6379/0
-      RACCOON_MONGO_CONNECTION_URL: mongodb://root:rootpassword@mongodb:27017
-    depends_on:
-      - redis
-      - mongodb
-    networks:
-      - raccoon-proxy-network-dev
-      - raccoon-config-network-dev
-    restart: unless-stopped
-
   raccoon-exchange:
     container_name: raccoon-exchange-service-dev
     image: masked-trader/exchange-service:dev
@@ -61,8 +43,10 @@ services:
       target: development
     environment:
       RACCOON_INTERNAL_API_BASE_URL: http://raccoon-proxy:5284
+      RACCOON_REDIS_CONNECTION_URL: redis://redis:6379/0
       RACCOON_MONGO_CONNECTION_URL: mongodb://root:rootpassword@mongodb:27017
     depends_on:
+      - redis
       - mongodb
     networks:
       - raccoon-proxy-network-dev
@@ -80,7 +64,6 @@ services:
       - mongodb-data-dev:/data/db
       - mongodb-data-dev:/data/configdb
     networks:
-      - raccoon-config-network-dev
       - raccoon-exchange-network-dev
       - raccoon-mongo-express-network-dev
     restart: unless-stopped
@@ -108,7 +91,7 @@ services:
     restart: unless-stopped
     command: redis-server --save "" --appendonly no --loadmodule /usr/lib/redis/modules/redistimeseries.so
     networks:
-      - raccoon-config-network-dev
+      - raccoon-exchange-network-dev
       - raccoon-websocket-network-dev
     volumes:
       - redis-data-dev:/data/
@@ -119,7 +102,6 @@ volumes:
 
 networks:
   raccoon-proxy-network-dev:
-  raccoon-config-network-dev:
   raccoon-exchange-network-dev:
   raccoon-websocket-network-dev:
   raccoon-mongo-express-network-dev:

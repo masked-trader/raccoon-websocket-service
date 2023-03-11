@@ -15,14 +15,12 @@ class WebsocketOrderHandler(WebsocketHandler):
 
     def process_msg_order(self, msg: list):
         for data in msg:
-            symbol = data["symbol"].replace("/", "")
-
-            db_key = self.get_db_key_private(self.handler_type, symbol)
+            db_key = self.get_db_key_private(self.handler_type, data["symbol"])
             self.redis.hset(db_key, data["id"], json.dumps(data))
 
             order_data = {
                 **data,
-                "symbol": symbol,
+                "symbol": data["symbol"],
                 "orderId": data["id"],
                 "connection": self.connection_id,
             }
