@@ -26,7 +26,7 @@ COPY pyproject.toml \
 
 RUN poetry install --only main --no-root --no-interaction --no-ansi
 
-COPY src/ /workspace/app/
+COPY src/ /workspace/src/
 
 COPY files/entrypoint.sh \
     files/wait-for-it.sh \
@@ -35,7 +35,7 @@ COPY files/entrypoint.sh \
 RUN chmod 775 \
     /wait-for-it.sh \
     /entrypoint.sh \
-    /workspace/app/main.py
+    /workspace/src/main.py
 
 RUN mv /wait-for-it.sh /bin/wait-for-it
 
@@ -46,11 +46,11 @@ WORKDIR /workspace
 RUN poetry install --with dev --no-root --no-interaction --no-ansi
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["poetry", "run", "python", "app/main.py"]
+CMD ["poetry", "run", "python", "src/main.py"]
 
 FROM builder-base AS production
 
 WORKDIR /workspace
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["poetry", "run", "python", "app/main.py"]
+CMD ["poetry", "run", "python", "src/main.py"]
